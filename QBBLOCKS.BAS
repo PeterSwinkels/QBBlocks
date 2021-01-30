@@ -157,7 +157,7 @@ FUNCTION GetRotatedShapeMap$ (Shape, Angle)
         NEXT BlockX
     END IF
 
-    GetRotatedShapeMap = RotatedMap$
+    GetRotatedShapeMap$ = RotatedMap$
 END FUNCTION
 
 FUNCTION GetShapeMap$ (Shape)
@@ -225,7 +225,7 @@ SUB Main ()
                CASE "A", "a"
                    DrawShape TRUE
                    IF ShapeAngle = 3 THEN NewAngle = 0 ELSE NewAngle = ShapeAngle + 1
-                   RotatedMap$ = GetRotatedShapeMap(Shape, NewAngle)
+                   RotatedMap$ = GetRotatedShapeMap$(Shape, NewAngle)
                    IF ShapeCanMove(RotatedMap$, 0, 0) THEN
                        ShapeAngle = NewAngle
                        ShapeMap$ = RotatedMap$
