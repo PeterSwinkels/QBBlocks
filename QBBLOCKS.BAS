@@ -32,7 +32,7 @@ COMMON SHARED DropRate!, GameOver, Pit$, Score, Shape, ShapeAngle, ShapeMap$, Sh
 InitializeGame
 Main
 
-SUB CheckForFullRows ()
+SUB CheckForFullRows
     FullRow = FALSE
 
     FOR PitY = 0 TO PITHEIGHT - 1
@@ -47,16 +47,16 @@ SUB CheckForFullRows ()
     NEXT PitY
 END SUB
 
-SUB CreateShape ()
+SUB CreateShape
     DropRate! = 1
-    Shape = INT(RND * 6)
+    Shape = CINT(RND * 6)
     ShapeAngle = INT(RND * 4)
     ShapeMap$ = GetRotatedShapeMap$(Shape, ShapeAngle)
     ShapeX = RandomShapeX
     ShapeY = -SIDEBLOCKCOUNT
 END SUB
 
-SUB DisplayStatus ()
+SUB DisplayStatus
     COLOR 4
     LOCATE INT((PITTOP * BLOCKSCALE) / 16), INT((PITLEFT * BLOCKSCALE) / 8) + 1
     IF GameOver THEN
@@ -74,7 +74,7 @@ SUB DrawBlock (BlockColor$, PitX, PitY)
     LINE (DrawX + CINT(BLOCKSCALE / 10) + (PITLEFT * BLOCKSCALE), DrawY + CINT(BLOCKSCALE / 10) + (PITTOP * BLOCKSCALE))-STEP(BLOCKSCALE - CINT(BLOCKSCALE / 5), BLOCKSCALE - CINT(BLOCKSCALE / 5)), 0, B
 END SUB
 
-SUB DrawPit ()
+SUB DrawPit
     LINE ((PITLEFT * BLOCKSCALE) - 1, (PITTOP * BLOCKSCALE) - 1)-STEP((PITWIDTH * BLOCKSCALE) + 2, (PITHEIGHT * BLOCKSCALE) + 2), 15, B
     LINE ((PITLEFT * BLOCKSCALE) - 1, (PITTOP * BLOCKSCALE) - 1)-STEP(PITWIDTH * BLOCKSCALE + 2, 0), 0
 
@@ -109,7 +109,7 @@ FOR BlockX = 0 TO LASTSIDEBLOCK
 NEXT BlockX
 END SUB
 
-SUB DropShape ()
+SUB DropShape
     IF ShapeCanMove(ShapeMap$, 0, 1) THEN
         DrawShape TRUE
         IF DropRate! > 0 THEN SOUND 37, .3
@@ -183,7 +183,7 @@ FUNCTION GetShapeMap$ (Shape)
     GetShapeMap$ = Map$
 END FUNCTION
 
-SUB InitializeGame ()
+SUB InitializeGame
     RANDOMIZE TIMER
     PLAY "ML L64"
 
@@ -191,7 +191,7 @@ SUB InitializeGame ()
     CLS
     COLOR 9
     LOCATE 1, 1
-    PRINT "QBBlocks v1.00 - by: Peter Swinkels, ***2019***"
+    PRINT "QBBlocks v1.01 - by: Peter Swinkels, ***2019***"
 
     CreateShape
 
@@ -203,7 +203,7 @@ SUB InitializeGame ()
     DisplayStatus
 END SUB
 
-SUB Main ()
+SUB Main
     StartTime! = TIMER
     DO
         DO
@@ -246,7 +246,7 @@ SUB Main ()
     LOOP
 END SUB
 
-FUNCTION RandomShapeX ()
+FUNCTION RandomShapeX
     IntendedShapeX = INT(RND * (PITWIDTH - 1))
     ShapeX = 0
 
@@ -277,7 +277,7 @@ SUB RemoveFullRow (RemovedRow)
     Score = Score + 1
 END SUB
 
-SUB SettleActiveShapeInPit ()
+SUB SettleActiveShapeInPit
     PLAY "N21"
 
     FOR BlockY = 0 TO LASTSIDEBLOCK
