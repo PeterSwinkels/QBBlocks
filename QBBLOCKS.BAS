@@ -92,21 +92,21 @@ SUB DrawPit
 END SUB
 
 SUB DrawShape (EraseShape)
-FOR BlockX = 0 TO LASTSIDEBLOCK
-    FOR BlockY = 0 TO LASTSIDEBLOCK
-        PitX = ShapeX + BlockX
-        PitY = ShapeY + BlockY
-        IF PitX >= 0 AND PitX < PITWIDTH AND PitY >= 0 AND PitY < PITHEIGHT THEN
-            IF EraseShape THEN
-                BlockColor$ = MID$(Pit$, ((PITWIDTH * PitY) + PitX) + 1, 1)
-            ELSE
-                BlockColor$ = MID$(ShapeMap$, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1)
-                IF BlockColor$ = NOBLOCK$ THEN BlockColor$ = MID$(Pit$, ((PITWIDTH * PitY) + PitX) + 1, 1)
+    FOR BlockX = 0 TO LASTSIDEBLOCK
+        FOR BlockY = 0 TO LASTSIDEBLOCK
+            PitX = ShapeX + BlockX
+            PitY = ShapeY + BlockY
+            IF PitX >= 0 AND PitX < PITWIDTH AND PitY >= 0 AND PitY < PITHEIGHT THEN
+                IF EraseShape THEN
+                    BlockColor$ = MID$(Pit$, ((PITWIDTH * PitY) + PitX) + 1, 1)
+                ELSE
+                    BlockColor$ = MID$(ShapeMap$, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1)
+                    IF BlockColor$ = NOBLOCK$ THEN BlockColor$ = MID$(Pit$, ((PITWIDTH * PitY) + PitX) + 1, 1)
+                END IF
+                DrawBlock BlockColor$, PitX, PitY
             END IF
-            DrawBlock BlockColor$, PitX, PitY
-        END IF
-    NEXT BlockY
-NEXT BlockX
+        NEXT BlockY
+    NEXT BlockX
 END SUB
 
 SUB DropShape
