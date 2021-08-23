@@ -27,7 +27,7 @@ CONST PITWIDTH = 10
 CONST SIDEBLOCKCOUNT = 4
 CONST TRUE = -1
 
-COMMON SHARED DropRate!, GameOver, Pit$, Score, Shape, ShapeAngle, ShapeMap$, ShapeX, ShapeY
+DIM SHARED DropRate!, GameOver, Pit$, Score, Shape, ShapeAngle, ShapeMap$, ShapeX, ShapeY
 
 InitializeGame
 Main
