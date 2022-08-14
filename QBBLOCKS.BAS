@@ -191,7 +191,7 @@ SUB InitializeGame
     CLS
     COLOR 9
     LOCATE 1, 1
-    PRINT "QBBlocks v1.01 - by: Peter Swinkels, ***2019***"
+    PRINT "QBBlocks v1.02 - by: Peter Swinkels, ***2019***"
 
     CreateShape
 
@@ -294,6 +294,8 @@ SUB SettleActiveShapeInPit
 END SUB
 
 FUNCTION ShapeCanMove (Map$, XDirection, YDirection)
+    CanMove = TRUE
+
     FOR BlockY = 0 TO LASTSIDEBLOCK
         FOR BlockX = 0 TO LASTSIDEBLOCK
             IF NOT MID$(Map$, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1) = NOBLOCK$ THEN
@@ -301,17 +303,18 @@ FUNCTION ShapeCanMove (Map$, XDirection, YDirection)
                 PitY = (ShapeY + BlockY) + YDirection
                 IF PitX >= 0 AND PitX < PITWIDTH AND PitY >= 0 AND PitY < PITHEIGHT THEN
                     IF NOT MID$(Pit$, (((PITWIDTH * PitY) + PitX) + 1), 1) = NOBLOCK$ THEN
-                        ShapeCanMove = FALSE
-                        EXIT FUNCTION
+                        CanMove = FALSE
+                        EXIT FOR
                     END IF
                 ELSEIF PitX < 0 OR PitX >= PITWIDTH OR PitY >= PITHEIGHT THEN
-                    ShapeCanMove = FALSE
-                    EXIT FUNCTION
+                    CanMove = FALSE
+                    EXIT FOR
                 END IF
             END IF
         NEXT BlockX
+        IF NOT CanMove THEN EXIT FOR
     NEXT BlockY
 
-    ShapeCanMove = TRUE
+    ShapeCanMove = CanMove
 END FUNCTION
 
