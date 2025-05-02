@@ -1,19 +1,19 @@
 DEFINT A-Z
 
-DECLARE FUNCTION GetRotatedShapeMap$ (Shape, Angle)
-DECLARE FUNCTION GetShapeMap$ (Shape)
+DECLARE FUNCTION GetRotatedShapeMap$ (Shape AS INTEGER, Angle AS INTEGER)
+DECLARE FUNCTION GetShapeMap$ (Shape AS INTEGER)
 DECLARE FUNCTION RandomShapeX ()
-DECLARE FUNCTION ShapeCanMove (Map$, XDirection, YDirection)
+DECLARE FUNCTION ShapeCanMove (Map AS STRING, XDirection AS INTEGER, YDirection AS INTEGER)
 DECLARE SUB CheckForFullRows ()
 DECLARE SUB CreateShape ()
 DECLARE SUB DisplayStatus ()
-DECLARE SUB DrawBlock (BlockColor$, PitX, PitY)
+DECLARE SUB DrawBlock (BlockColor AS STRING, PitX AS INTEGER, PitY AS INTEGER)
 DECLARE SUB DrawPit ()
-DECLARE SUB DrawShape (EraseShape)
+DECLARE SUB DrawShape (EraseShape AS INTEGER)
 DECLARE SUB DropShape ()
 DECLARE SUB InitializeGame ()
 DECLARE SUB Main ()
-DECLARE SUB RemoveFullRow (RemovedRow)
+DECLARE SUB RemoveFullRow (RemovedRow AS INTEGER)
 DECLARE SUB SettleActiveShapeInPit ()
 
 CONST BLOCKSCALE = 24
@@ -27,18 +27,30 @@ CONST PITWIDTH = 10
 CONST SIDEBLOCKCOUNT = 4
 CONST TRUE = -1
 
-DIM SHARED DropRate!, GameOver, Pit$, Score, Shape, ShapeAngle, ShapeMap$, ShapeX, ShapeY
+DIM SHARED DropRate AS SINGLE
+DIM SHARED GameOver AS INTEGER
+DIM SHARED Pit AS STRING
+DIM SHARED Score AS INTEGER
+DIM SHARED Shape AS INTEGER
+DIM SHARED ShapeAngle AS INTEGER
+DIM SHARED ShapeMap AS STRING
+DIM SHARED ShapeX AS INTEGER
+DIM SHARED ShapeY AS INTEGER
 
 InitializeGame
 Main
 
-SUB CheckForFullRows
+SUB CheckForFullRows ()
+DIM FullRow AS INTEGER
+DIM PitX AS INTEGER
+DIM PitY AS INTEGER
+
     FullRow = FALSE
 
     FOR PitY = 0 TO PITHEIGHT - 1
        FullRow = TRUE
        FOR PitX = 0 TO PITWIDTH - 1
-           IF MID$(Pit$, ((PITWIDTH * PitY) + PitX) + 1, 1) = NOBLOCK$ THEN
+           IF MID$(Pit, ((PITWIDTH * PitY) + PitX) + 1, 1) = NOBLOCK$ THEN
               FullRow = FALSE
               EXIT FOR
            END IF
@@ -47,16 +59,16 @@ SUB CheckForFullRows
     NEXT PitY
 END SUB
 
-SUB CreateShape
-    DropRate! = 1
+SUB CreateShape ()
+    DropRate = 1
     Shape = CINT(RND * 6)
     ShapeAngle = INT(RND * 4)
-    ShapeMap$ = GetRotatedShapeMap$(Shape, ShapeAngle)
+    ShapeMap = GetRotatedShapeMap$(Shape, ShapeAngle)
     ShapeX = RandomShapeX
     ShapeY = -SIDEBLOCKCOUNT
 END SUB
 
-SUB DisplayStatus
+SUB DisplayStatus ()
     COLOR 4
     LOCATE INT((PITTOP * BLOCKSCALE) / 16), INT((PITLEFT * BLOCKSCALE) / 8) + 1
     IF GameOver THEN
@@ -66,53 +78,66 @@ SUB DisplayStatus
     END IF
 END SUB
 
-SUB DrawBlock (BlockColor$, PitX, PitY)
+SUB DrawBlock (BlockColor AS STRING, PitX AS INTEGER, PitY AS INTEGER)
+DIM DrawX AS INTEGER
+DIM DrawY AS INTEGER
+
     DrawX = PitX * BLOCKSCALE
     DrawY = PitY * BLOCKSCALE
 
-    LINE (DrawX + (PITLEFT * BLOCKSCALE), DrawY + (PITTOP * BLOCKSCALE))-STEP(BLOCKSCALE, BLOCKSCALE), VAL("&H" + BlockColor$), BF
+    LINE (DrawX + (PITLEFT * BLOCKSCALE), DrawY + (PITTOP * BLOCKSCALE))-STEP(BLOCKSCALE, BLOCKSCALE), VAL("&H" + BlockColor), BF
     LINE (DrawX + CINT(BLOCKSCALE / 10) + (PITLEFT * BLOCKSCALE), DrawY + CINT(BLOCKSCALE / 10) + (PITTOP * BLOCKSCALE))-STEP(BLOCKSCALE - CINT(BLOCKSCALE / 5), BLOCKSCALE - CINT(BLOCKSCALE / 5)), 0, B
 END SUB
 
-SUB DrawPit
+SUB DrawPit ()
+DIM BlockColor AS STRING
+DIM PitX AS INTEGER
+DIM PitY AS INTEGER
+
     LINE ((PITLEFT * BLOCKSCALE) - 1, (PITTOP * BLOCKSCALE) - 1)-STEP((PITWIDTH * BLOCKSCALE) + 2, (PITHEIGHT * BLOCKSCALE) + 2), 15, B
     LINE ((PITLEFT * BLOCKSCALE) - 1, (PITTOP * BLOCKSCALE) - 1)-STEP(PITWIDTH * BLOCKSCALE + 2, 0), 0
 
     FOR PitY = 0 TO PITHEIGHT - 1
         FOR PitX = 0 TO PITWIDTH - 1
             IF GameOver THEN
-                BlockColor$ = "4"
+                BlockColor = "4"
             ELSE
-                BlockColor$ = MID$(Pit$, ((PITWIDTH * PitY) + PitX) + 1, 1)
+                BlockColor = MID$(Pit, ((PITWIDTH * PitY) + PitX) + 1, 1)
             END IF
 
-            DrawBlock BlockColor$, PitX, PitY
+            DrawBlock BlockColor, PitX, PitY
         NEXT PitX
     NEXT PitY
 END SUB
 
-SUB DrawShape (EraseShape)
+SUB DrawShape (EraseShape AS INTEGER)
+DIM BlockColor AS STRING
+DIM BlockX AS INTEGER
+DIM BlockY AS INTEGER
+DIM PitX AS INTEGER
+DIM PitY AS INTEGER
+
     FOR BlockX = 0 TO LASTSIDEBLOCK
         FOR BlockY = 0 TO LASTSIDEBLOCK
             PitX = ShapeX + BlockX
             PitY = ShapeY + BlockY
             IF PitX >= 0 AND PitX < PITWIDTH AND PitY >= 0 AND PitY < PITHEIGHT THEN
                 IF EraseShape THEN
-                    BlockColor$ = MID$(Pit$, ((PITWIDTH * PitY) + PitX) + 1, 1)
+                    BlockColor = MID$(Pit, ((PITWIDTH * PitY) + PitX) + 1, 1)
                 ELSE
-                    BlockColor$ = MID$(ShapeMap$, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1)
-                    IF BlockColor$ = NOBLOCK$ THEN BlockColor$ = MID$(Pit$, ((PITWIDTH * PitY) + PitX) + 1, 1)
+                    BlockColor = MID$(ShapeMap, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1)
+                    IF BlockColor = NOBLOCK$ THEN BlockColor = MID$(Pit, ((PITWIDTH * PitY) + PitX) + 1, 1)
                 END IF
-                DrawBlock BlockColor$, PitX, PitY
+                DrawBlock BlockColor, PitX, PitY
             END IF
         NEXT BlockY
     NEXT BlockX
 END SUB
 
-SUB DropShape
-    IF ShapeCanMove(ShapeMap$, 0, 1) THEN
+SUB DropShape ()
+    IF ShapeCanMove(ShapeMap, 0, 1) THEN
         DrawShape TRUE
-        IF DropRate! > 0 THEN SOUND 37, .3
+        IF DropRate > 0 THEN SOUND 37, .3
         ShapeY = ShapeY + 1
         DrawShape FALSE
     ELSE
@@ -131,13 +156,20 @@ SUB DropShape
     END IF
 END SUB
 
-FUNCTION GetRotatedShapeMap$ (Shape, Angle)
-    Map$ = GetShapeMap$(Shape)
+FUNCTION GetRotatedShapeMap$ (Shape AS INTEGER, Angle AS INTEGER)
+DIM BlockX AS INTEGER
+DIM BlockY AS INTEGER
+DIM Map AS STRING
+DIM NewBlockX AS INTEGER
+DIM NewBlockY AS INTEGER
+DIM RotatedMap AS STRING
+
+    Map = GetShapeMap$(Shape)
     
     IF Angle = 0 THEN
-        RotatedMap$ = Map$
+        RotatedMap = Map
     ELSE
-        RotatedMap$ = STRING$(SIDEBLOCKCOUNT * SIDEBLOCKCOUNT, NOBLOCK$)
+        RotatedMap = STRING$(SIDEBLOCKCOUNT * SIDEBLOCKCOUNT, NOBLOCK$)
         FOR BlockX = 0 TO LASTSIDEBLOCK
             FOR BlockY = 0 TO LASTSIDEBLOCK
                 SELECT CASE Angle
@@ -152,38 +184,40 @@ FUNCTION GetRotatedShapeMap$ (Shape, Angle)
                         NewBlockY = LASTSIDEBLOCK - BlockX
                 END SELECT
 
-                MID$(RotatedMap$, ((SIDEBLOCKCOUNT * NewBlockY) + NewBlockX) + 1, 1) = MID$(Map$, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1)
+                MID$(RotatedMap, ((SIDEBLOCKCOUNT * NewBlockY) + NewBlockX) + 1, 1) = MID$(Map, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1)
             NEXT BlockY
         NEXT BlockX
     END IF
 
-    GetRotatedShapeMap$ = RotatedMap$
+    GetRotatedShapeMap$ = RotatedMap
 END FUNCTION
 
-FUNCTION GetShapeMap$ (Shape)
+FUNCTION GetShapeMap$ (Shape AS INTEGER)
+DIM Map AS STRING
+
     SELECT CASE Shape
         CASE 0
-           Map$ = "0000333300000000"
+           Map = "0000333300000000"
         CASE 1
-           Map$ = "0000111000100000"
+           Map = "0000111000100000"
         CASE 2
-           Map$ = "0000666060000000"
+           Map = "0000666060000000"
         CASE 3
-           Map$ = "00000EE00EE00000"
+           Map = "00000EE00EE00000"
         CASE 4
-           Map$ = "0000022022000000"
+           Map = "0000022022000000"
         CASE 5
-           Map$ = "0000555005000000"
+           Map = "0000555005000000"
         CASE 6
-           Map$ = "0000440004400000"
+           Map = "0000440004400000"
         CASE ELSE
-           Map$ = ""
+           Map = ""
     END SELECT
 
-    GetShapeMap$ = Map$
+    GetShapeMap$ = Map
 END FUNCTION
 
-SUB InitializeGame
+SUB InitializeGame ()
     RANDOMIZE TIMER
     PLAY "ML L64"
 
@@ -191,67 +225,75 @@ SUB InitializeGame
     CLS
     COLOR 9
     LOCATE 1, 1
-    PRINT "QBBlocks v1.02 - by: Peter Swinkels, ***2019***"
+    PRINT "QBBlocks v1.03 - by: Peter Swinkels, ***2019x***"
 
     CreateShape
 
     GameOver = FALSE
-    Pit$ = STRING$(PITWIDTH * PITHEIGHT, NOBLOCK$)
+    Pit = STRING$(PITWIDTH * PITHEIGHT, NOBLOCK$)
     Score = 0
 
     DrawPit
     DisplayStatus
 END SUB
 
-SUB Main
-    StartTime! = TIMER
+SUB Main ()
+DIM KeyStroke AS STRING
+DIM NewAngle AS INTEGER
+DIM RotatedMap AS STRING
+DIM StartTime AS SINGLE
+
+    StartTime = TIMER
     DO
         DO
             IF NOT GameOver THEN
-                IF TIMER >= StartTime! + DropRate! OR StartTime! > TIMER THEN
+                IF TIMER >= StartTime + DropRate OR StartTime > TIMER THEN
                     DropShape
-                    StartTime! = TIMER
+                    StartTime = TIMER
                 END IF
             END IF
-            Key$ = INKEY$
-        LOOP WHILE Key$ = ""
-        IF Key$ = CHR$(27) THEN
+            KeyStroke = INKEY$
+        LOOP WHILE KeyStroke = ""
+        IF KeyStroke = CHR$(27) THEN
             SCREEN 0
             END
         ELSEIF GameOver THEN
-            IF Key$ = CHR$(13) THEN InitializeGame
+            IF KeyStroke = CHR$(13) THEN InitializeGame
         ELSE
-            SELECT CASE Key$
+            SELECT CASE KeyStroke
                CASE "A", "a"
                    DrawShape TRUE
                    IF ShapeAngle = 3 THEN NewAngle = 0 ELSE NewAngle = ShapeAngle + 1
-                   RotatedMap$ = GetRotatedShapeMap$(Shape, NewAngle)
-                   IF ShapeCanMove(RotatedMap$, 0, 0) THEN
+                   RotatedMap = GetRotatedShapeMap$(Shape, NewAngle)
+                   IF ShapeCanMove(RotatedMap, 0, 0) THEN
                        ShapeAngle = NewAngle
-                       ShapeMap$ = RotatedMap$
+                       ShapeMap = RotatedMap
                    END IF
                    DrawShape FALSE
                CASE CHR$(0) + "K"
                    DrawShape TRUE
-                   IF ShapeCanMove(ShapeMap$, -1, 0) THEN ShapeX = ShapeX - 1
+                   IF ShapeCanMove(ShapeMap, -1, 0) THEN ShapeX = ShapeX - 1
                    DrawShape FALSE
                CASE CHR$(0) + "M"
                    DrawShape TRUE
-                   IF ShapeCanMove(ShapeMap$, 1, 0) THEN ShapeX = ShapeX + 1
+                   IF ShapeCanMove(ShapeMap, 1, 0) THEN ShapeX = ShapeX + 1
                    DrawShape FALSE
                CASE " "
-                   DropRate! = 0
+                   DropRate = 0
             END SELECT
         END IF
     LOOP
 END SUB
 
-FUNCTION RandomShapeX
+FUNCTION RandomShapeX ()
+DIM IntendedShapeX AS INTEGER
+DIM XMove AS INTEGER
+
     IntendedShapeX = INT(RND * (PITWIDTH - 1))
     ShapeX = 0
 
     FOR XMove = 0 TO IntendedShapeX
-        IF ShapeCanMove(ShapeMap$, 1, 0) THEN
+        IF ShapeCanMove(ShapeMap, 1, 0) THEN
             ShapeX = ShapeX + 1
         ELSE
             EXIT FOR
@@ -261,23 +303,32 @@ FUNCTION RandomShapeX
     RandomShapeX = ShapeX
 END FUNCTION
 
-SUB RemoveFullRow (RemovedRow)
+SUB RemoveFullRow (RemovedRow AS INTEGER)
+DIM BlockColor AS STRING
+DIM PitX AS INTEGER
+DIM PitY AS INTEGER
+
     FOR PitY = RemovedRow TO 0 STEP -1
         FOR PitX = 0 TO PITWIDTH - 1
             IF PitY = 0 THEN
-                BlockColor$ = NOBLOCK$
+                BlockColor = NOBLOCK$
             ELSE
-                BlockColor$ = MID$(Pit$, ((PITWIDTH * (PitY - 1)) + PitX) + 1, 1)
+                BlockColor = MID$(Pit, ((PITWIDTH * (PitY - 1)) + PitX) + 1, 1)
             END IF
 
-            MID$(Pit$, ((PITWIDTH * PitY) + PitX) + 1, 1) = BlockColor$
+            MID$(Pit, ((PITWIDTH * PitY) + PitX) + 1, 1) = BlockColor
         NEXT PitX
     NEXT PitY
 
     Score = Score + 1
 END SUB
 
-SUB SettleActiveShapeInPit
+SUB SettleActiveShapeInPit ()
+DIM BlockX AS INTEGER
+DIM BlockY AS INTEGER
+DIM PitX AS INTEGER
+DIM PitY AS INTEGER
+
     PLAY "N21"
 
     FOR BlockY = 0 TO LASTSIDEBLOCK
@@ -285,24 +336,30 @@ SUB SettleActiveShapeInPit
             PitX = ShapeX + BlockX
             PitY = ShapeY + BlockY
             IF PitX >= 0 AND PitX < PITWIDTH AND PitY >= 0 AND PitY < PITHEIGHT THEN
-                IF NOT MID$(ShapeMap$, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1) = NOBLOCK$ THEN
-                   MID$(Pit$, ((PITWIDTH * PitY) + PitX) + 1, 1) = MID$(ShapeMap$, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1)
+                IF NOT MID$(ShapeMap, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1) = NOBLOCK$ THEN
+                   MID$(Pit, ((PITWIDTH * PitY) + PitX) + 1, 1) = MID$(ShapeMap, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1)
                 END IF
             END IF
         NEXT BlockX
     NEXT BlockY
 END SUB
 
-FUNCTION ShapeCanMove (Map$, XDirection, YDirection)
+FUNCTION ShapeCanMove (Map AS STRING, XDirection AS INTEGER, YDirection AS INTEGER)
+DIM BlockX AS INTEGER
+DIM BlockY AS INTEGER
+DIM CanMove AS INTEGER
+DIM PitX AS INTEGER
+DIM PitY AS INTEGER
+
     CanMove = TRUE
 
     FOR BlockY = 0 TO LASTSIDEBLOCK
         FOR BlockX = 0 TO LASTSIDEBLOCK
-            IF NOT MID$(Map$, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1) = NOBLOCK$ THEN
+            IF NOT MID$(Map, ((SIDEBLOCKCOUNT * BlockY) + BlockX) + 1, 1) = NOBLOCK$ THEN
                 PitX = (ShapeX + BlockX) + XDirection
                 PitY = (ShapeY + BlockY) + YDirection
                 IF PitX >= 0 AND PitX < PITWIDTH AND PitY >= 0 AND PitY < PITHEIGHT THEN
-                    IF NOT MID$(Pit$, (((PITWIDTH * PitY) + PitX) + 1), 1) = NOBLOCK$ THEN
+                    IF NOT MID$(Pit, (((PITWIDTH * PitY) + PitX) + 1), 1) = NOBLOCK$ THEN
                         CanMove = FALSE
                         EXIT FOR
                     END IF
