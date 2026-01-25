@@ -16,7 +16,7 @@ DECLARE SUB Main ()
 DECLARE SUB RemoveFullRow (RemovedRow AS INTEGER)
 DECLARE SUB SettleActiveShapeInPit ()
 
-CONST BLOCKSCALE = 24
+CONST BLOCKSIZE = 24
 CONST FALSE = 0
 CONST LASTSIDEBLOCK = 3
 CONST NOBLOCK$ = "0"
@@ -40,7 +40,7 @@ DIM SHARED ShapeY AS INTEGER
 InitializeGame
 Main
 
-SUB CheckForFullRows ()
+SUB CheckForFullRows
 DIM FullRow AS INTEGER
 DIM PitX AS INTEGER
 DIM PitY AS INTEGER
@@ -59,7 +59,7 @@ DIM PitY AS INTEGER
     NEXT PitY
 END SUB
 
-SUB CreateShape ()
+SUB CreateShape
     DropRate = 1
     Shape = CINT(RND * 6)
     ShapeAngle = INT(RND * 4)
@@ -68,9 +68,9 @@ SUB CreateShape ()
     ShapeY = -SIDEBLOCKCOUNT
 END SUB
 
-SUB DisplayStatus ()
+SUB DisplayStatus
     COLOR 4
-    LOCATE INT((PITTOP * BLOCKSCALE) / 16), INT((PITLEFT * BLOCKSCALE) / 8) + 1
+    LOCATE INT((PITTOP * BLOCKSIZE) / 16), INT((PITLEFT * BLOCKSIZE) / 8) + 1
     IF GameOver THEN
         PRINT "Game over - press Enter to play a new game."
     ELSE
@@ -82,20 +82,20 @@ SUB DrawBlock (BlockColor AS STRING, PitX AS INTEGER, PitY AS INTEGER)
 DIM DrawX AS INTEGER
 DIM DrawY AS INTEGER
 
-    DrawX = PitX * BLOCKSCALE
-    DrawY = PitY * BLOCKSCALE
+    DrawX = PitX * BLOCKSIZE
+    DrawY = PitY * BLOCKSIZE
 
-    LINE (DrawX + (PITLEFT * BLOCKSCALE), DrawY + (PITTOP * BLOCKSCALE))-STEP(BLOCKSCALE, BLOCKSCALE), VAL("&H" + BlockColor), BF
-    LINE (DrawX + CINT(BLOCKSCALE / 10) + (PITLEFT * BLOCKSCALE), DrawY + CINT(BLOCKSCALE / 10) + (PITTOP * BLOCKSCALE))-STEP(BLOCKSCALE - CINT(BLOCKSCALE / 5), BLOCKSCALE - CINT(BLOCKSCALE / 5)), 0, B
+    LINE (DrawX + (PITLEFT * BLOCKSIZE), DrawY + (PITTOP * BLOCKSIZE))-STEP(BLOCKSIZE, BLOCKSIZE), VAL("&H" + BlockColor), BF
+    LINE (DrawX + CINT(BLOCKSIZE / 10) + (PITLEFT * BLOCKSIZE), DrawY + CINT(BLOCKSIZE / 10) + (PITTOP * BLOCKSIZE))-STEP(BLOCKSIZE - CINT(BLOCKSIZE / 5), BLOCKSIZE - CINT(BLOCKSIZE / 5)), 0, B
 END SUB
 
-SUB DrawPit ()
+SUB DrawPit
 DIM BlockColor AS STRING
 DIM PitX AS INTEGER
 DIM PitY AS INTEGER
 
-    LINE ((PITLEFT * BLOCKSCALE) - 1, (PITTOP * BLOCKSCALE) - 1)-STEP((PITWIDTH * BLOCKSCALE) + 2, (PITHEIGHT * BLOCKSCALE) + 2), 15, B
-    LINE ((PITLEFT * BLOCKSCALE) - 1, (PITTOP * BLOCKSCALE) - 1)-STEP(PITWIDTH * BLOCKSCALE + 2, 0), 0
+    LINE ((PITLEFT * BLOCKSIZE) - 1, (PITTOP * BLOCKSIZE) - 1)-STEP((PITWIDTH * BLOCKSIZE) + 2, (PITHEIGHT * BLOCKSIZE) + 2), 15, B
+    LINE ((PITLEFT * BLOCKSIZE) - 1, (PITTOP * BLOCKSIZE) - 1)-STEP(PITWIDTH * BLOCKSIZE + 2, 0), 0
 
     FOR PitY = 0 TO PITHEIGHT - 1
         FOR PitX = 0 TO PITWIDTH - 1
@@ -134,7 +134,7 @@ DIM PitY AS INTEGER
     NEXT BlockX
 END SUB
 
-SUB DropShape ()
+SUB DropShape
     IF ShapeCanMove(ShapeMap, 0, 1) THEN
         DrawShape TRUE
         IF DropRate > 0 THEN SOUND 37, .3
@@ -217,7 +217,7 @@ DIM Map AS STRING
     GetShapeMap$ = Map
 END FUNCTION
 
-SUB InitializeGame ()
+SUB InitializeGame
     RANDOMIZE TIMER
     PLAY "ML L64"
 
@@ -225,7 +225,7 @@ SUB InitializeGame ()
     CLS
     COLOR 9
     LOCATE 1, 1
-    PRINT "QBBlocks v1.03 - by: Peter Swinkels, ***2019x***"
+    PRINT "QBBlocks v1.04 - by: Peter Swinkels, ***2019x***"
 
     CreateShape
 
@@ -237,7 +237,7 @@ SUB InitializeGame ()
     DisplayStatus
 END SUB
 
-SUB Main ()
+SUB Main
 DIM KeyStroke AS STRING
 DIM NewAngle AS INTEGER
 DIM RotatedMap AS STRING
@@ -285,7 +285,7 @@ DIM StartTime AS SINGLE
     LOOP
 END SUB
 
-FUNCTION RandomShapeX ()
+FUNCTION RandomShapeX
 DIM IntendedShapeX AS INTEGER
 DIM XMove AS INTEGER
 
@@ -323,7 +323,7 @@ DIM PitY AS INTEGER
     Score = Score + 1
 END SUB
 
-SUB SettleActiveShapeInPit ()
+SUB SettleActiveShapeInPit
 DIM BlockX AS INTEGER
 DIM BlockY AS INTEGER
 DIM PitX AS INTEGER
